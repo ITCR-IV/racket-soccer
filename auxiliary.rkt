@@ -1,6 +1,6 @@
 #lang racket
 
-(provide init-players check-kick-ball all-leq5?)
+(provide init-players check-kick-ball all-leq5? fix-collisions)
 
 
 ;;;;;; player initialization
@@ -16,7 +16,7 @@
 (define (init-players-aux specs players portero2)
   ; specs es lista de 6 elementos con tipos de jugador de cada equipo (no se incluyen porteros)
   ; esta función va restando de specs cada jugador que ingresa a la lista final hasta que obtiene a todos los jugadores
-  ;(printf "specs: ~v\n" specs)
+  ;(printf "specs: ~v\n" specs))
 
   (cond 
     ; crear primer portero
@@ -55,6 +55,43 @@
 ;;;;; Patear la bola
 (define (check-kick-ball players) (list 1 2) )
 
+;;;;; colisiones entre jugadores
+(define (fix-collisions players)
+  (fix-collisions-aux players players)
+  )
+
+(define (move-player player )
+  (list (car player) (cadr player) (list (+ (caaddr player) 10) (car (cdaddr player))) (last player))
+  )
+
+(define (fix-collisions-aux playerslist playersiter)
+  (if (null? playersiter) #f
+    (if (check-collisions playerslist (car playersiter) 0)
+      (append (take  playerslist (check-collisions playerslist (car playersiter) 0)) (cons (move-player (list-ref playerslist (check-collisions playerslist (car playersiter) 0))) (cdr (list-tail playerslist (check-collisions playerslist (car playersiter) 0)))) )
+      (begin
+	(fix-collisions-aux playerslist (cdr playersiter))
+	)
+      )
+    )
+  )
+
+; Revisa la colisión de un jugador con el resto de los jugadores, retorna el índice del jugador con el que choca.
+(define (check-collisions players check-player i)
+  ;(printf "players left: ~v\n" players)
+  ;(printf "null? players: ~v\n" (null? players))
+  ;(printf "check-player: ~v \n" check-player)
+  (if (null? players) #f
+    (if (equal? check-player (car players) ) (check-collisions (cdr players) check-player (add1 i))
+      (if (check-circles-collision (caaddr check-player) (car (cdaddr check-player)) 16 
+				   (caaddr (car players)) (car (cdaddr (car players))) 16) i 
+	(check-collisions (cdr players) check-player (add1 i)))
+      )
+    )
+  )
+
+(define (check-circles-collision point1x point1y radi1 point2x point2y radi2)
+  (< (sqrt ( + (expt (- point2x point1x) 2) (expt (- point2y point1y) 2))) (+ radi1 radi2))
+  )
 
 ;;;;; misc
 (define (all-leq5? lst)

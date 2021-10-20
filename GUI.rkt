@@ -9,6 +9,9 @@
 ; el jugador
 (define players '())
 
+; font
+(define font (make-object font% 16 'default))
+
 (define (move-ball move-x move-y) 
   (set! ball (list (+ (car ball) move-x) (+ (cadr ball) move-y) (caddr ball)))
   )
@@ -68,31 +71,49 @@
   (send dc draw-ellipse 495 320 10 10)
   )
 
-(define (draw-player dc player)
+(define (draw-player dc player n)
   (send dc set-pen (if (zero? (cadr player)) "blue" "red") 4 'solid)
   (send dc set-brush (case (car player) 
 		       [(0) "deep sky blue"]
-		       [(1) "pale green"]
+		       [(1) "forest green"]
 		       [(2) "orange red"]
 		       [(3) "dark red"]) 'solid)
 
-  (send dc draw-ellipse ( - (caaddr player)  16) ( - (car (cdaddr player)) 16)
+  ;(printf "val: ~v\n"  (* (if (>= n 10) 1 2) (send dc get-char-width)))
+  (send dc draw-ellipse ( - (caaddr player)  (* (if (>= n 10) 1 2) (send dc get-char-width))) ( - (car (cdaddr player)) 16)
 	(* 2 16) (* 2 16))
+
+  ;el número
+  ;(send dc set-pen "white" 3 'solid)
+  (send dc draw-text (number->string n) (- (caaddr player) 15) ( - (car (cdaddr player)) 15) )
+
   )
 
-(define (draw-players dc lst)
+(define (draw-players dc lst n)
   (if (null? lst) (void)
-    (begin (draw-player dc (car lst)) (draw-players dc (cdr lst)))
+    (begin (draw-player dc (car lst) n) (draw-players dc (cdr lst) (add1 n)))
     )
   )
 
 
 ; dibuja la siguiente iteración generativa
 (define (draw-time canvas dc)
+  ;(printf "\n\n")
+  (send dc set-font font)
   (draw-field dc)
   (draw-ball dc)
-  (draw-players dc players)
+  (draw-players dc players 0)
   (send dc draw-text (date->string (current-date) #t) 50 50)
+  )
+
+(define (fix-until-ok)
+  (let ([test-fix (fix-collisions players)])
+    (if test-fix (begin 
+		     (set! players test-fix)
+		     (fix-until-ok)
+		     )
+      (void))
+    )
   )
 
 ; frame
@@ -110,6 +131,7 @@
 		       (begin 
 			 ;(print-cake (random 10))
 			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
+			 (printf "fix: ~v\n" (fix-until-ok))
 			 (refresh) ) (void))
 		     )
     (super-new [parent frame] [paint-callback draw-time])
