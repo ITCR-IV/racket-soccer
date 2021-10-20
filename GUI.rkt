@@ -4,7 +4,10 @@
 (require "auxiliary.rkt")
 
 ; la bola
-(define ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
+(define ball '()) 
+
+; el jugador
+(define players '())
 
 (define (move-ball move-x move-y) 
   (set! ball (list (+ (car ball) move-x) (+ (cadr ball) move-y) (caddr ball)))
@@ -65,17 +68,36 @@
   (send dc draw-ellipse 495 320 10 10)
   )
 
+(define (draw-player dc player)
+  (send dc set-pen (if (zero? (cadr player)) "blue" "red") 4 'solid)
+  (send dc set-brush (case (car player) 
+		       [(0) "deep sky blue"]
+		       [(1) "pale green"]
+		       [(2) "orange red"]
+		       [(3) "dark red"]) 'solid)
+
+  (send dc draw-ellipse ( - (caaddr player)  16) ( - (car (cdaddr player)) 16)
+	(* 2 16) (* 2 16))
+  )
+
+(define (draw-players dc lst)
+  (if (null? lst) (void)
+    (begin (draw-player dc (car lst)) (draw-players dc (cdr lst)))
+    )
+  )
+
 
 ; dibuja la siguiente iteración generativa
 (define (draw-time canvas dc)
   (draw-field dc)
   (draw-ball dc)
+  (draw-players dc players)
   (send dc draw-text (date->string (current-date) #t) 50 50)
   )
 
 ; frame
 (define frame (new frame%
-		   [label "Example"]
+		   [label "CCEQ"]
 		   [width 1000]
 		   [height 650]))
 
@@ -94,10 +116,20 @@
     )
   )
 
-; new-canvas
-(define canvas (new generative-canvas%))
+(define (CCEQ equipo1 equipo2 gens)
+  (if (not (all-leq5? (append equipo1 equipo2))) (error "En el método CCEQ se permite un máximo de 5 de cualquier tipo de jugador para cada equipo.") (void))
 
-; config
-(send canvas set-canvas-background (make-color 42 100 55 1))
-(send (send canvas get-dc) set-text-foreground "white")
-(send frame show #t)
+  ; globals
+  (set! players (init-players (append equipo1 equipo2)))
+  (set! ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
+
+  ; new-canvas
+  (define canvas (new generative-canvas%))
+
+  ; config
+  (send canvas set-canvas-background (make-color 42 100 55 1))
+  (send (send canvas get-dc) set-text-foreground "white")
+  (send frame show #t)
+  )
+
+(CCEQ '(4 4 2) '(5 3 2) 20)
