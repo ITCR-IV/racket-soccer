@@ -1,6 +1,7 @@
 #lang racket/gui
 
 (require racket/date)
+(require "auxiliary.rkt")
 
 ; la bola
 (define ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
@@ -85,6 +86,7 @@
     (define/override (on-char key)
 		     (if (equal? (send key get-key-code) #\space)
 		       (begin 
+			 ;(print-cake (random 10))
 			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
 			 (refresh) ) (void))
 		     )

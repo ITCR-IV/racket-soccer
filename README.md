@@ -16,6 +16,8 @@
 - La información de jugadores viene en una lista de 22 individuos y cada individuo está representado por una lista de la siguiente manera
 	- Jugador: (TipoJugador Equipo (x,y) stats)
 	- stats: (velocidad fuerza habilidad)
+- Los jugadores siguien el orden:
+	- (portero0, defensas0, medios0, delanteros0, portero1, defensa1, medios1, delanteros1)
 
 - El GUI es el papá del algoritmo genético, encargado de manejar toda la info de los jugadores y nada más se la pasa al genético para generar generaciones nuevas, como el siguiente pseudocódigo:
 ```
