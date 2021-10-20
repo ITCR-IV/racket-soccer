@@ -2,24 +2,91 @@
 
 (require racket/date)
 
-; draws the current time on the canvas
+; la bola
+(define ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
+
+(define (move-ball move-x move-y) 
+  (set! ball (list (+ (car ball) move-x) (+ (cadr ball) move-y) (caddr ball)))
+  )
+
+(define (draw-ball dc)
+  (send dc set-pen "black" 2 'solid)
+  (send dc set-brush "white" 'solid)
+  (send dc draw-ellipse ( - (car ball)  (caddr ball)) ( - (cadr ball) (caddr ball) )
+	(* 2 (caddr ball)) (* 2 (caddr ball)))
+  )
+
+(define (kick-ball-animation canvas finalx finaly)
+  (define x-interval ( / (- finalx (car ball)) 15))
+  (define y-interval ( / (- finaly (cadr ball)) 15))
+  (define timer-counter 0)
+  (define timer
+    (new timer%
+	 (notify-callback
+	   (lambda ()
+	     (cond [(< timer-counter 15) ;; va a durar 1.5 segundos en llegar
+		    (set! timer-counter (add1 timer-counter))
+		    (move-ball x-interval y-interval)
+		    (send canvas refresh)]
+		   [else
+		     (send timer stop)])))))
+  (send timer start 100) ; update cada 100ms
+  )
+
+; dibuja la cancha base
+(define (draw-field dc)
+  (send dc set-pen "white" 7 'solid)
+  (send dc set-brush "white" 'transparent)
+
+  ; borde de la cancha
+  (send dc draw-rectangle 0 0 1000 650)
+  ; rectangulos canchas
+  (send dc draw-rectangle 0 125 165 400)
+  (send dc draw-rectangle 835 125 165 400)
+  (send dc draw-rectangle 0 235 55 183)
+  (send dc draw-rectangle 945 235 55 183)
+
+  ; linea del centro
+  (send dc draw-line 500 0 500 650)
+
+  ; circulitos de esquinas
+  (send dc set-pen "white" 5 'solid)
+  (send dc draw-ellipse -25 -25 50 50)
+  (send dc draw-ellipse -25 625 50 50)
+  (send dc draw-ellipse 975 -25 50 50)
+  (send dc draw-ellipse 975 625 50 50)
+
+  ; circulo del centro
+  (send dc draw-ellipse 409 234 182 182)
+
+  ; punto pequeño del centro
+  (send dc set-brush "white" 'solid)
+  (send dc draw-ellipse 495 320 10 10)
+  )
+
+
+; dibuja la siguiente iteración generativa
 (define (draw-time canvas dc)
+  (draw-field dc)
+  (draw-ball dc)
   (send dc draw-text (date->string (current-date) #t) 50 50)
   )
 
-; new frame
+; frame
 (define frame (new frame%
 		   [label "Example"]
 		   [width 1000]
-		   [height 500]))
+		   [height 650]))
 
-; define a canvas that acts on spacebar keypress
+; definir un canvas que dibuja cuando se estripa la barra espaciadora
 (define generative-canvas%
   (class canvas%
     (inherit refresh)
     (define/override (on-char key)
 		     (if (equal? (send key get-key-code) #\space)
-		       (refresh) (void))
+		       (begin 
+			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
+			 (refresh) ) (void))
 		     )
     (super-new [parent frame] [paint-callback draw-time])
     )
