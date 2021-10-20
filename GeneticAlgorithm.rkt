@@ -1,12 +1,27 @@
 #lang racket
-;(define (geneticAlgorithm playerList ballPos)
-;(my_append (geneticAlgorithmPortero playerList 0 ballPos) (my_append (geneticAlgorithmDefensas playerList 0 ballPos) (my_append (geneticAlgorithmMedios playerList 0 ballPos)
-;(my_append (geneticAlgorithmDelanteros playerList 0 ballPos) (my_append (geneticAlgorithmPortero playerList 1 ballPos) (my_append (geneticAlgorithmDefensas playerList 1 ballPos)
-;(my_append (geneticAlgorithmMedios playerList 1 ballPos) (geneticAlgorithmDelanteros playerList 1 ballPos))))))))
-;)
 
+;Main Genetc Algorithm Function
+(define (geneticAlgorithm playerList ballPos)
+(my_append (geneticAlgorithmPortero playerList 0 ballPos) (my_append (geneticAlgorithmDefensas playerList 0 ballPos) (my_append (geneticAlgorithmMedios playerList 0 ballPos)
+(my_append (geneticAlgorithmDelanteros playerList 0 ballPos) (my_append (geneticAlgorithmPortero playerList 1 ballPos) (my_append (geneticAlgorithmDefensas playerList 1 ballPos)
+(my_append (geneticAlgorithmMedios playerList 1 ballPos) (geneticAlgorithmDelanteros playerList 1 ballPos))))))))
+)
+
+;Aux. Algorithm
 (define (geneticAlgorithmPortero playerList teamNum ballPos)
   (mutationFunction(reproductionFunction (selectFunction (quicksort (fitnessFunction playerList teamNum 0 ballPos)) (* 2 (howManyTypePlayers playerList 0 teamNum))) teamNum 0))
+)
+
+(define (geneticAlgorithmDefensas playerList teamNum ballPos)
+  (mutationFunction(reproductionFunction (selectFunction (quicksort (fitnessFunction playerList teamNum 1 ballPos)) (* 2 (howManyTypePlayers playerList 1 teamNum))) teamNum 1))
+)
+
+(define (geneticAlgorithmMedios playerList teamNum ballPos)
+  (mutationFunction(reproductionFunction (selectFunction (quicksort (fitnessFunction playerList teamNum 2 ballPos)) (* 2 (howManyTypePlayers playerList 2 teamNum))) teamNum 2))
+)
+
+(define (geneticAlgorithmDelanteros playerList teamNum ballPos)
+  (mutationFunction(reproductionFunction (selectFunction (quicksort (fitnessFunction playerList teamNum 3 ballPos)) (* 2 (howManyTypePlayers playerList 3 teamNum))) teamNum 3))
 )
 
 ;FUNCIONES DE FITNESS
