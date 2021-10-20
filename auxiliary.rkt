@@ -77,7 +77,7 @@
     (if  (check-circles-collision (caaddr (car players)) (car (cdaddr (car players))) 18 
 				  (car ballpos) (cadr ballpos) 16) 
       (begin 
-	(sumlists ballpos (multlist (normalize (sublists (if (zero? (cadr (car players))) '(1000 325) '(0 325)) ballpos)) (* (cadr (cadddr (car players))) 17) )) )
+	(sumlists ballpos (multlist (normalize (sublists (if (zero? (cadr (car players))) '(1000 325) '(0 325)) ballpos)) (* (cadr (cadddr (car players))) 20) )) )
       (kick-ball (cdr players) ballpos)
       )
     )

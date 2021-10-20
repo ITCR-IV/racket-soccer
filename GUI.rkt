@@ -7,6 +7,10 @@
 ; el puntaje
 (define score '(0 0))
 
+; las generaciones
+(define generacion 0)
+
+
 ; la bola
 (define ball '()) 
 
@@ -124,6 +128,14 @@
     (void))
   )
 
+(define (check-finish)
+  (if (or (zero? generacion) (> (- (car score) (cadr score)) 3) (> (- (cadr score) (car score)) 3) )
+    ( begin (printf "juego terminado!")
+	    (exit))
+    (void)
+    )
+  )
+
 ; dibuja la siguiente iteración generativa
 (define (draw-time canvas dc)
   ;(printf "\n\n")
@@ -171,30 +183,35 @@
 		     (if (equal? (send key get-key-code) #\space)
 		       (begin 
 			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
+			 (check-finish)
 			 (set! players (geneticAlgorithm players (take ball 2)))
 			 (fix-until-ok)
 			 (kick-ball-aux this)
 			 (check-score)
+			 (set! generacion (sub1 generacion))
 			 (refresh) ) (void))
 		     )
     (super-new [parent frame] [paint-callback draw-time])
     )
   )
 
+; new-canvas
+(define canvas (new generative-canvas%))
+
 (define (CCEQ equipo1 equipo2 gens)
-  (if (not (all-leq5? (append equipo1 equipo2))) (error "En el método CCEQ se permite un máximo de 5 de cualquier tipo de jugador para cada equipo.") (void))
+  (if (not (all-leq5? (append equipo1 equipo2))) (error "En el método CCEQ se permite un máximo de 5 de cualquier tipo de jugador para cada equipo.") 
+    (; globals                                                             
+     (set! players (init-players (append equipo1 equipo2)))
+     (set! ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
+     (set! generacion gens)
 
-  ; globals
-  (set! players (init-players (append equipo1 equipo2)))
-  (set! ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
+     ; config
+     (send canvas set-canvas-background (make-color 42 100 55 1))
+     (send (send canvas get-dc) set-text-foreground "white")
+     (send frame show #t)
+     )
+    ))
 
-  ; new-canvas
-  (define canvas (new generative-canvas%))
 
-  ; config
-  (send canvas set-canvas-background (make-color 42 100 55 1))
-  (send (send canvas get-dc) set-text-foreground "white")
-  (send frame show #t)
-  )
 
 (CCEQ '(4 4 2) '(5 3 2) 20)
