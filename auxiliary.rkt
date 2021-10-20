@@ -1,6 +1,6 @@
 #lang racket
 
-(provide init-players check-kick-ball all-leq5? fix-collisions)
+(provide init-players kick-ball all-leq5? fix-collisions)
 
 
 ;;;;;; player initialization
@@ -51,9 +51,37 @@
     )
   )
 
-
 ;;;;; Patear la bola
-(define (check-kick-ball players) (list 1 2) )
+
+(define (norm vectour)
+  (sqrt (+ (expt (car vectour) 2) (expt (cadr vectour) 2)))
+  )
+(define (normalize vectour)
+  (list (/ (car vectour) (norm vectour)) (/ (cadr vectour) (norm vectour)))
+  )
+
+(define (sublists lst1 lst2)
+  (list (- (car lst1) (car lst2)) (- (cadr lst1) (cadr lst2)))
+  )
+
+(define (sumlists lst1 lst2)
+  (list (+ (car lst1) (car lst2)) (+ (cadr lst1) (cadr lst2)))
+  )
+
+(define (multlist lst1 val)
+  (list (* (car lst1) val) (* (cadr lst1) val))
+  )
+
+(define (kick-ball players ballpos) 
+  (if (null? players) ballpos
+    (if  (check-circles-collision (caaddr (car players)) (car (cdaddr (car players))) 18 
+				  (car ballpos) (cadr ballpos) 16) 
+      (begin 
+	(sumlists ballpos (multlist (normalize (sublists (if (zero? (cadr (car players))) '(1000 325) '(0 325)) ballpos)) (* (cadr (cadddr (car players))) 17) )) )
+      (kick-ball (cdr players) ballpos)
+      )
+    )
+  )
 
 ;;;;; colisiones entre jugadores
 (define (fix-collisions players)

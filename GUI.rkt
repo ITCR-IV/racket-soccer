@@ -4,14 +4,18 @@
 (require "auxiliary.rkt")
 (require "GeneticAlgorithm.rkt")
 
+; el puntaje
+(define score '(0 0))
+
 ; la bola
 (define ball '()) 
 
 ; el jugador
 (define players '())
 
-; font
-(define font (make-object font% 16 'default))
+; fonts
+(define number-font (make-object font% 16 'default))
+(define score-font (make-object font% 25 'default))
 
 (define (move-ball move-x move-y) 
   (set! ball (list (+ (car ball) move-x) (+ (cadr ball) move-y) (caddr ball)))
@@ -96,24 +100,60 @@
     )
   )
 
+;;;; cosas de puntaje
+(define (draw-score dc)
+  (send dc draw-text (number->string (car score)) 300 75)
+  (send dc draw-text (number->string (cadr score)) 700 75)
+  )
+
+(define (check-goal)
+  (if (< 955 (car ball))
+    0
+    (if (> 0 (car ball))
+      1
+      #f)
+    )
+  )
+
+(define (check-score)
+  (if (check-goal) 
+    (begin
+      (set! score (list-update score (check-goal) add1))
+      (set! ball (list 500 325 12)) 
+      )
+    (void))
+  )
 
 ; dibuja la siguiente iteración generativa
 (define (draw-time canvas dc)
   ;(printf "\n\n")
-  (send dc set-font font)
+  (send dc set-font number-font)
   (draw-field dc)
   (draw-ball dc)
   (draw-players dc players 0)
   (send dc draw-text (date->string (current-date) #t) 50 50)
+
+  (send dc set-font score-font)
+  (draw-score dc)
   )
 
 (define (fix-until-ok)
   (let ([test-fix (fix-collisions players)])
     (if test-fix (begin 
-		     (set! players test-fix)
-		     (fix-until-ok)
-		     )
+		   (set! players test-fix)
+		   (fix-until-ok)
+		   )
       (void))
+    )
+  )
+
+(define (kick-ball-aux canvas)
+  (let ([new-ball (append (kick-ball players (take ball 2)) (cddr ball))])
+    (if (equal? ball new-ball) (void)
+      (begin
+	(printf "new ball: ~v\n" new-ball)
+	(kick-ball-animation canvas (car new-ball) (cadr new-ball) )
+	(set! ball new-ball)) )
     )
   )
 
@@ -130,10 +170,11 @@
     (define/override (on-char key)
 		     (if (equal? (send key get-key-code) #\space)
 		       (begin 
-			 ;(print-cake (random 10))
 			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
 			 (set! players (geneticAlgorithm players (take ball 2)))
-			 (printf "fix: ~v\n" (fix-until-ok))
+			 (fix-until-ok)
+			 (kick-ball-aux this)
+			 (check-score)
 			 (refresh) ) (void))
 		     )
     (super-new [parent frame] [paint-callback draw-time])
