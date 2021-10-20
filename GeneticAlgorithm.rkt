@@ -1,5 +1,7 @@
 #lang racket
 
+(provide geneticAlgorithm)
+
 ;Main Genetc Algorithm Function
 (define (geneticAlgorithm playerList ballPos)
 (my_append (geneticAlgorithmPortero playerList 0 ballPos) (my_append (geneticAlgorithmDefensas playerList 0 ballPos) (my_append (geneticAlgorithmMedios playerList 0 ballPos)

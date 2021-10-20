@@ -2,6 +2,7 @@
 
 (require racket/date)
 (require "auxiliary.rkt")
+(require "GeneticAlgorithm.rkt")
 
 ; la bola
 (define ball '()) 
@@ -131,6 +132,7 @@
 		       (begin 
 			 ;(print-cake (random 10))
 			 ;(kick-ball-animation canvas (+ (car ball) 100) (+ (cadr ball) 100) )
+			 (set! players (geneticAlgorithm players (take ball 2)))
 			 (printf "fix: ~v\n" (fix-until-ok))
 			 (refresh) ) (void))
 		     )
