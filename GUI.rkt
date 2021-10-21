@@ -200,7 +200,7 @@
 
 (define (CCEQ equipo1 equipo2 gens)
   (if (not (all-leq5? (append equipo1 equipo2))) (error "En el método CCEQ se permite un máximo de 5 de cualquier tipo de jugador para cada equipo.") 
-    (; globals                                                             
+    (begin ; globals                                                             
      (set! players (init-players (append equipo1 equipo2)))
      (set! ball (list 500 325 12)) ;empieza en el centro y tiene radio de 5
      (set! generacion gens)
